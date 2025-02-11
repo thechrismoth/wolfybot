@@ -1,6 +1,8 @@
 name: deploy
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
 
@@ -18,7 +20,6 @@ jobs:
           port: ${{ secrets.PORT}}
           script: |
             cd ~/Wolfybot 
-            sudo git fetch origin
-            sudo git reset --hard origin/main
-            sudo git clean -fdx --exclude=.env
+            git fetch origin
+            git reset --hard origin/main
             /snap/bin/docker-compose up -d --build
