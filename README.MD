@@ -1,4 +1,4 @@
-![alt Wolfybot](/images/wolf.png)
+![alt Wolfybot](app/images/wolf.png)
 
 <h4 align="center">Wolfybot</h4>
 
