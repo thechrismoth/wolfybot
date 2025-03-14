@@ -1,10 +1,8 @@
-name: deploy
+name: Release CI/CD
 
 on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -14,11 +12,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      # Шаг 1: Проверка кода
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Шаг 2: Логин в GitHub Container Registry
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
@@ -26,23 +22,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      # Шаг 3: Сборка и пушинг образа app
-      - name: Build and push app image
+      - name: Set environment variables
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:latest ./app
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:latest
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "TOKEN=${{ secrets.TOKEN }}" >> $GITHUB_ENV
+          echo "ID=${{ secrets.ID }}" >> $GITHUB_ENV
+          echo "AITOKEN=${{ secrets.AITOKEN }}" >> $GITHUB_ENV
+          echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
-      # Шаг 4: Сборка и пушинг образа nginx
-      - name: Build and push nginx image
+      - name: Build and push using docker build
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/nginx:latest ./nginx
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/nginx:latest
+          docker build -t ghcr.io/thechrismoth/wolfybot/app:$TAG ./app
+          docker build -t ghcr.io/thechrismoth/wolfybot/nginx:$TAG ./nginx
+          docker tag ghcr.io/thechrismoth/wolfybot/app:$TAG ghcr.io/thechrismoth/wolfybot/app:latest
+          docker tag ghcr.io/thechrismoth/wolfybot/nginx:$TAG ghcr.io/thechrismoth/wolfybot/nginx:latest
+          docker push ghcr.io/thechrismoth/wolfybot/app:$TAG
+          docker push ghcr.io/thechrismoth/wolfybot/nginx:$TAG
+          docker push ghcr.io/thechrismoth/wolfybot/app:latest
+          docker push ghcr.io/thechrismoth/wolfybot/nginx:latest
 
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
-      # Шаг 5: Деплой на сервер
+      # Шаг 9: Деплой на сервер
       - name: Deploy using ssh
         uses: appleboy/ssh-action@master
         with:
@@ -52,17 +55,12 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ~/Wolfybot
-            # Логин в GitHub Container Registry
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            # Экспорт переменных окружения
             export DATABASE_URL='${{ secrets.DATABASE_URL }}'
             export TOKEN='${{ secrets.TOKEN }}'
             export ID='${{ secrets.ID }}'
             export AITOKEN='${{ secrets.AITOKEN }}'
-            # Остановка и удаление старых контейнеров
+            export TAG=${{ github.event.release.tag_name }}
             docker compose down
-            # Скачивание новых образов
             docker compose pull
-            # Запуск новых контейнеров
             docker compose up -d
-

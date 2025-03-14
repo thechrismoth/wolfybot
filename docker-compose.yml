@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: ghcr.io/thechrismoth/wolfybot/app:latest
+    image: ghcr.io/thechrismoth/wolfybot/app:${TAG}
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - TOKEN=${TOKEN}
@@ -14,7 +14,7 @@ services:
     restart: always
 
   nginx:
-    image: ghcr.io/thechrismoth/wolfybot/nginx:latest
+    image: ghcr.io/thechrismoth/wolfybot/nginx:${TAG}
     ports:
       - '80:80'
     depends_on:
