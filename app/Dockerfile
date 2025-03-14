@@ -1,4 +1,4 @@
-FROM python:3.12.6
+FROM python:3.12.6-slim
 
 # Указываем рабочую директорию
 WORKDIR /app
