@@ -4,11 +4,11 @@ services:
   app:
     image: ghcr.io/thechrismoth/wolfybot/app:${TAG}
     build:
-      context: .
-      dockerfile: ./app
+      context: ./app
+      dockerfile: Dockerfile
 
   nginx:
     image: ghcr.io/thechrismoth/wolfybot/nginx:${TAG}
     build:
-      context: .
-      dockerfile: ./nginx
+      context: ./nginx
+      dockerfile: Dockerfile
