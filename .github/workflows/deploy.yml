@@ -33,7 +33,6 @@ jobs:
       - name: Build and tag Docker images
         run: |
           docker compose -f docker-compose.build.yml build
-          docker compose -f docker-compose.build.yml tag
 
       - name: Push Docker images
         run: |
