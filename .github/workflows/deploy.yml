@@ -34,9 +34,17 @@ jobs:
         run: |
           docker compose -f docker-compose.build.yml build
 
+      - name: Tag images with latest
+        run: |
+          docker tag ghcr.io/thechrismoth/wolfybot/app:$TAG ghcr.io/thechrismoth/wolfybot/app:latest
+          docker tag ghcr.io/thechrismoth/wolfybot/nginx:$TAG ghcr.io/thechrismoth/wolfybot/nginx:latest
+
       - name: Push Docker images
         run: |
-          docker compose -f docker-compose.build.yml push
+          docker push ghcr.io/thechrismoth/wolfybot/app:$TAG
+          docker push ghcr.io/thechrismoth/wolfybot/nginx:$TAG
+          docker push ghcr.io/thechrismoth/wolfybot/app:latest
+          docker push ghcr.io/thechrismoth/wolfybot/nginx:latest
 
   deploy:
     runs-on: ubuntu-latest
