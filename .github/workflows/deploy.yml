@@ -30,16 +30,14 @@ jobs:
           echo "AITOKEN=${{ secrets.AITOKEN }}" >> $GITHUB_ENV
           echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
-      - name: Build and push using docker build
+      - name: Build and tag Docker images
         run: |
-          docker build -t ghcr.io/thechrismoth/wolfybot/app:$TAG ./app
-          docker build -t ghcr.io/thechrismoth/wolfybot/nginx:$TAG ./nginx
-          docker tag ghcr.io/thechrismoth/wolfybot/app:$TAG ghcr.io/thechrismoth/wolfybot/app:latest
-          docker tag ghcr.io/thechrismoth/wolfybot/nginx:$TAG ghcr.io/thechrismoth/wolfybot/nginx:latest
-          docker push ghcr.io/thechrismoth/wolfybot/app:$TAG
-          docker push ghcr.io/thechrismoth/wolfybot/nginx:$TAG
-          docker push ghcr.io/thechrismoth/wolfybot/app:latest
-          docker push ghcr.io/thechrismoth/wolfybot/nginx:latest
+          docker compose -f docker-compose.build.yml build
+          docker compose -f docker-compose.build.yml tag
+
+      - name: Push Docker images
+        run: |
+          docker compose -f docker-compose.build.yml push
 
   deploy:
     runs-on: ubuntu-latest

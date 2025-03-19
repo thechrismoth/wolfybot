@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    image: ghcr.io/thechrismoth/wolfybot/app:${{ github.event.release.tag_name }}
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+
+  nginx:
+    image: ghcr.io/thechrismoth/wolfybot/nginx:${{ github.event.release.tag_name }}
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
