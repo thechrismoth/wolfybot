@@ -7,8 +7,20 @@ services:
       context: ./app
       dockerfile: Dockerfile
 
+  app-latest:
+    image: ghcr.io/thechrismoth/wolfybot/app:latest
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+
   nginx:
     image: ghcr.io/thechrismoth/wolfybot/nginx:${TAG}
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+
+  nginx-latest:
+    image: ghcr.io/thechrismoth/wolfybot/nginx:latest
     build:
       context: ./nginx
       dockerfile: Dockerfile
